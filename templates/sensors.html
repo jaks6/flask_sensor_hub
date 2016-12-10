@@ -1,0 +1,89 @@
+{% extends "layout.html" %}
+{% block body %}
+
+  <div class="jumbotron">
+      <p class="lead">Average temperature: </p>
+      <h1>{{ format(avg, '.2f') }} &#8451;</h1>
+      
+  </div>
+
+  <div class="row average">
+    <canvas class="col-lg-8" id="myChart"></canvas>
+  </div>
+
+  <div class="row marketing">
+      <div class="col-lg-6">
+          <h3>Temperature from humidity sensor</h3>
+          <p> {{ format(sensor_values.temp_humidity_sensor, '.2f') }} &#8451;</p>
+
+          <h3>Humidity level</h3>
+          <p>{{format(sensor_values.humidity, '.2f') }} &#37;</p>
+
+
+      </div>
+
+      <div class="col-lg-6">
+          <h3>Temperature from pressure sensor</h3>
+          <p>{{format(sensor_values.temp_pressure_sensor, '.2f') }} &#8451;</p>
+
+          <h3>Air pressure level</h3>
+          <p>{{format(sensor_values.pressure, '.2f') }} Pa</p>
+
+      </div>
+  </div>
+
+
+<script>
+  var data = {{ history |safe}};
+  
+  var labels = [];
+  var datapoints = [];
+  for (var i in data) {
+    //labels.push(new Date(data[i].timestamp).toLocaleString());
+    labels.push(formatDate(new Date(data[i].timestamp)));
+    datapoints.push(data[i].value.toFixed(2));
+}
+  
+  var ctx = document.getElementById('myChart').getContext('2d');
+  var myChart = new Chart(ctx, {
+    type: 'line',
+    
+    data: {
+      labels: labels,
+      datasets: [
+        {
+            label: "Temperature",
+            data: datapoints,
+            fill: false,
+            borderColor: "#c41d02"
+          }
+      ]
+    },
+
+    options: {
+        scales: {
+            yAxes: [{
+                ticks: {
+                    //suggestedMax: 30,
+                    //suggestedMin: 20,
+                    fixedStepSize: 1
+                }
+            }]
+        }
+    }
+  });
+
+  function formatDate(date) {
+    hour = date.getHours(),
+    minute = date.getMinutes(),
+    second = date.getSeconds(),
+    //hourFormatted = hour % 12 || 12, // hour returned in 24 hour format
+    minuteFormatted = minute < 10 ? "0" + minute : minute;
+    secondFormatted = second < 10 ? "0" + second : second;
+        
+
+    return hour + ":" +
+            minuteFormatted + ":" + secondFormatted;
+}
+  </script>
+{% endblock %}
